@@ -1,0 +1,7 @@
+backtesting
+yfinance
+PyQt5
+matplotlib
+mplfinance
+pandas
+numpy
