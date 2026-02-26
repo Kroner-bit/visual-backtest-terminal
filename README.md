@@ -13,8 +13,31 @@
 
 ---
 
+## Screenshots
+
+<p align="center">
+  <img src="https://i.imgur.com/0zpl8px.png" alt="Main Window — Visual Backtest Terminal" width="900"/>
+  <br/>
+  <em>Main Window — Bar-by-bar replay with candlestick chart, trade panel, and equity curve</em>
+</p>
+
+<p align="center">
+  <img src="https://i.imgur.com/QR9NqPj.png" alt="Strategy Optimizer" width="700"/>
+  <br/>
+  <em>Strategy Optimizer — Grid search with heatmap visualization</em>
+</p>
+
+<p align="center">
+  <img src="https://i.imgur.com/SeZ75Yw.png" alt="Walk-Forward Analysis" width="700"/>
+  <br/>
+  <em>Walk-Forward Analysis — Rolling optimization with contiguous test windows</em>
+</p>
+
+---
+
 ## Table of Contents
 
+- [Screenshots](#screenshots)
 - [Overview](#overview)
 - [Key Features](#key-features)
 - [Architecture](#architecture)
@@ -179,8 +202,8 @@ Built on top of the [`backtesting.py`](https://github.com/kernc/backtesting.py) 
 
 ```bash
 # 1. Clone or download the project
-git clone <repository-url>
-cd azure-chromosphere
+git clone https://github.com/Kroner-bit/visual-backtest-terminal.git
+cd visual-backtest-terminal
 
 # 2. Create virtual environment
 python -m venv .venv
