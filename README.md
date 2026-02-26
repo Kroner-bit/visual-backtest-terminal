@@ -124,12 +124,12 @@ Built on top of the [`backtesting.py`](https://github.com/kernc/backtesting.py) 
   ┌─────────────────────────────────────────────┐
   │           Dialog Windows                    │
   │  ┌──────────────┐  ┌──────────────────────┐ │
-  │  │ optimizer_    │  │ walkforward_        │ │
-  │  │ dialog.py     │  │ dialog.py           │ │
+  │  │ optimizer_   │  │ walkforward_         │ │
+  │  │ dialog.py    │  │ dialog.py            │ │
   │  └──────────────┘  └──────────────────────┘ │
   │  ┌──────────────┐  ┌──────────────────────┐ │
-  │  │ data_manager  │  │ pdf_export.py       │ │
-  │  │ .py           │  │                     │ │
+  │  │ data_manager │  │ pdf_export.py        │ │
+  │  │ .py          │  │                      │ │
   │  └──────────────┘  └──────────────────────┘ │
   └─────────────────────────────────────────────┘
 
@@ -137,7 +137,7 @@ Built on top of the [`backtesting.py`](https://github.com/kernc/backtesting.py) 
   │           Backend                           │
   │  ┌──────────────┐  ┌──────────────────────┐ │
   │  │ backtest_    │  │ data_cache.py        │ │
-  │  │ engine.py     │  │ (SQLite)            │ │
+  │  │ engine.py    │  │ (SQLite)             │ │
   │  └──────────────┘  └──────────────────────┘ │
   │  ┌──────────────┐                           │
   │  │ data_fetcher │                           │
