@@ -110,7 +110,7 @@ Built on top of the [`backtesting.py`](https://github.com/kernc/backtesting.py) 
                        │
           ┌────────────▼────────────┐
           │     gui/main_window.py  │
-          │    (Central Orchestrator)│
+          │   (Central Orchestrator)│
           └──┬───┬───┬───┬───┬───┬──┘
              │   │   │   │   │   │
      ┌───────┘   │   │   │   │   └────────┐
@@ -122,22 +122,22 @@ Built on top of the [`backtesting.py`](https://github.com/kernc/backtesting.py) 
                equity_curve.py
 
   ┌─────────────────────────────────────────────┐
-  │           Dialog Windows                     │
+  │           Dialog Windows                    │
   │  ┌──────────────┐  ┌──────────────────────┐ │
-  │  │ optimizer_    │  │ walkforward_         │ │
-  │  │ dialog.py     │  │ dialog.py            │ │
+  │  │ optimizer_    │  │ walkforward_        │ │
+  │  │ dialog.py     │  │ dialog.py           │ │
   │  └──────────────┘  └──────────────────────┘ │
   │  ┌──────────────┐  ┌──────────────────────┐ │
-  │  │ data_manager  │  │ pdf_export.py        │ │
-  │  │ .py           │  │                      │ │
+  │  │ data_manager  │  │ pdf_export.py       │ │
+  │  │ .py           │  │                     │ │
   │  └──────────────┘  └──────────────────────┘ │
   └─────────────────────────────────────────────┘
 
   ┌─────────────────────────────────────────────┐
-  │           Backend                            │
+  │           Backend                           │
   │  ┌──────────────┐  ┌──────────────────────┐ │
   │  │ backtest_    │  │ data_cache.py        │ │
-  │  │ engine.py     │  │ (SQLite)             │ │
+  │  │ engine.py     │  │ (SQLite)            │ │
   │  └──────────────┘  └──────────────────────┘ │
   │  ┌──────────────┐                           │
   │  │ data_fetcher │                           │
