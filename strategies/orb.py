@@ -107,13 +107,29 @@ class OpeningRangeBreakout(Strategy):
             self._range_high = -float('inf')
             self._range_low = float('inf')
             self._traded_today = False
+            self._day_start_bar = len(self.data) - 1
 
         self._day_bar_count += 1
+        current_bar = len(self.data) - 1
 
         # Phase 1: Building the opening range (first N bars)
         if self._day_bar_count <= self.opening_bars:
             self._range_high = max(self._range_high, self.data.High[-1])
             self._range_low = min(self._range_low, self.data.Low[-1])
+            
+            # If this is exactly the last bar of the opening range, draw the rectangle
+            if self._day_bar_count == self.opening_bars and hasattr(self, 'draw'):
+                self.draw.rectangle(
+                    bar1=self._day_start_bar, 
+                    price1=self._range_low,
+                    bar2=current_bar, 
+                    price2=self._range_high,
+                    color='#FFD740',        # Yellow border
+                    fill_color='#FFD740',   # Yellow fill
+                    width=1.0, 
+                    alpha=0.15              # Subtle transparency
+                )
+                
             return  # Don't trade during range building
 
         # Phase 2: Trading — only if range is valid and no trade yet today
