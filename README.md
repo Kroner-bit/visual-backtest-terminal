@@ -432,6 +432,36 @@ The optimizer auto-detects parameters that are:
 - **Numeric type** (`int` or `float`)
 - **Simple assignments** (e.g., `n1 = 10`, not `n1 = some_function()`)
 
+### Drawing API (MT5 Style)
+
+Visual Backtest Terminal injects a `self.draw` object into your strategy, allowing you to create custom chart objects during the backtest run just like MT5's `ObjectCreate`. 
+
+Objects are automatically rendered on the chart during visual replay.
+
+**Supported Objects:**
+1. **Horizontal Line:** `self.draw.hline(price, color, style, width)`
+2. **Vertical Line:** `self.draw.vline(bar_index, color, style, width)`
+3. **Trend Line:** `self.draw.trendline(bar1, price1, bar2, price2, color, style, extend_right)`
+4. **Rectangle:** `self.draw.rectangle(bar1, price1, bar2, price2, color, fill_color, alpha)`
+5. **Text:** `self.draw.text(bar_index, price, "Hello", color, size, bgcolor, bold)`
+
+**Example:**
+```python
+def next(self):
+    current_bar = len(self.data) - 1
+    
+    if crossover(self.sma1, self.sma2):
+        self.buy()
+        
+        # Draw a green vertical line at entry
+        self.draw.vline(bar=current_bar, color='#00E676', style='--')
+        
+        # Draw text above the high
+        self.draw.text(bar=current_bar, price=self.data.High[-1] * 1.01, 
+                       text="BUY SIGNAL", color='white', bgcolor='#1B5E20')
+```
+*See `strategies/mt5_drawing_demo.py` for a complete example.*
+
 ### Tips
 
 - Use `self.I()` to register indicators — they'll appear on the chart

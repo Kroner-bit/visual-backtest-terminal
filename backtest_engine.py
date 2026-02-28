@@ -15,6 +15,8 @@ import numpy as np
 import pandas as pd
 from backtesting import Backtest, Strategy
 
+from gui.objects import Drawer, ChartObject
+
 
 @dataclass
 class TradeRecord:
@@ -49,6 +51,7 @@ class BarState:
     open_trades: List[Dict]     # Currently open trades at this bar
     trade_events: List[Dict]    # Trades opened or closed at this bar
     indicators: Dict[str, float]  # Indicator values at this bar
+    chart_objects: List[ChartObject] # Custom drawn objects until this bar
 
 
 class BacktestReplay:
@@ -63,6 +66,7 @@ class BacktestReplay:
         self.trades: List[TradeRecord] = []
         self.equity_curve: Optional[np.ndarray] = None
         self.indicators: Dict[str, np.ndarray] = {}
+        self.drawer: Drawer = Drawer()
         self.total_bars: int = 0
         self.initial_cash: float = 10_000
         self._bt: Optional[Backtest] = None
@@ -136,11 +140,30 @@ class BacktestReplay:
         self.strategy_class = strategy_class
         self.initial_cash = cash
         self.total_bars = len(data)
+        self.drawer = Drawer()
+
+        # We must monkey-patch the init/next of the strategy to inject drawer
+        # and update its current bar index.
+        OriginalStrategyClass = strategy_class
+        
+        class InjectedStrategy(OriginalStrategyClass):
+            def __init__(self_strategy, broker, data, params):
+                super().__init__(broker, data, params)
+                self_strategy.draw = self.drawer
+
+            def init(self_strategy):
+                self.drawer.set_current_bar(0)
+                super().init()
+
+            def next(self_strategy):
+                # Update drawer state to the current bar *before* strategy code executes
+                self.drawer.set_current_bar(len(self_strategy.data) - 1)
+                super().next()
 
         # Run the backtest
         self._bt = Backtest(
             data,
-            strategy_class,
+            InjectedStrategy,
             cash=cash,
             commission=commission,
             spread=spread,
@@ -325,6 +348,9 @@ class BacktestReplay:
 
         volume = float(row.get('Volume', 0)) if 'Volume' in row.index else 0.0
 
+        # Get chart objects created up to this bar
+        chart_objects = self.drawer.get_objects_until(bar_index)
+
         return BarState(
             bar_index=bar_index,
             timestamp=self.data.index[bar_index],
@@ -337,6 +363,7 @@ class BacktestReplay:
             open_trades=open_trades,
             trade_events=trade_events,
             indicators=indicator_vals,
+            chart_objects=chart_objects,
         )
 
     def get_closed_trades_until(self, bar_index: int) -> List[TradeRecord]:

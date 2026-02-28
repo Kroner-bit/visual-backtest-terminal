@@ -412,6 +412,7 @@ class MainWindow(QMainWindow):
             trade_markers=visible_markers,
             open_trades=bar_state.open_trades,
             indicators=self.replay.indicators,
+            chart_objects=bar_state.chart_objects,
         )
 
         # Update trades panel

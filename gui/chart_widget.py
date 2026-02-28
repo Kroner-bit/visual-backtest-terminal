@@ -11,9 +11,11 @@ from PyQt5.QtWidgets import QWidget, QVBoxLayout, QSizePolicy
 from PyQt5.QtCore import Qt
 from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg as FigureCanvas
 from matplotlib.figure import Figure
-from matplotlib.patches import FancyArrowPatch
+import matplotlib.patches as patches
 import matplotlib.dates as mdates
 import matplotlib.ticker as mticker
+
+from gui.objects import ChartObject, HLine, VLine, TrendLine, Rectangle, Text
 
 
 # MT5-style dark colors
@@ -62,6 +64,7 @@ class ChartWidget(QWidget):
         self.trade_markers = []    # List of dicts {bar, price, type, is_long}
         self.indicator_data = {}   # name -> array
         self.open_trade_lines = [] # Currently open trade horizontal lines
+        self.chart_objects = []    # Custom objects drawn by strategy
 
         # Chart setup
         self.fig = Figure(facecolor=COLORS['bg'], dpi=100)
@@ -104,9 +107,11 @@ class ChartWidget(QWidget):
         self.indicator_data = indicators or {}
         self.trade_markers = []
         self.open_trade_lines = []
+        self.chart_objects = []
 
     def update_chart(self, bar_index: int, trade_markers: list = None,
-                     open_trades: list = None, indicators: dict = None):
+                     open_trades: list = None, indicators: dict = None,
+                     chart_objects: list = None):
         """
         Redraw the chart up to bar_index.
 
@@ -115,6 +120,7 @@ class ChartWidget(QWidget):
             trade_markers: List of {bar, price, type ('OPEN'/'CLOSE'), is_long}
             open_trades: List of {entry_bar, entry_price, is_long, current_price}
             indicators: Dict of indicator name -> array
+            chart_objects: List of custom drawn objects
         """
         if self.ohlcv_data is None or self.ohlcv_data.empty:
             return
@@ -125,6 +131,8 @@ class ChartWidget(QWidget):
             self.trade_markers = trade_markers
         if indicators is not None:
             self.indicator_data = indicators
+        if chart_objects is not None:
+            self.chart_objects = chart_objects
 
         # Determine visible window
         start = max(0, self.visible_bars - self.window_size)
@@ -239,6 +247,57 @@ class ChartWidget(QWidget):
                 color = COLORS['buy_marker'] if is_long else COLORS['sell_marker']
                 self.ax_price.axhline(y=entry_price, color=color, linewidth=0.8,
                                       linestyle='--', alpha=0.6, zorder=5)
+
+        # Draw custom chart objects
+        for obj in self.chart_objects:
+            z = obj.layer
+            if isinstance(obj, HLine):
+                self.ax_price.axhline(y=obj.price, color=obj.color, linestyle=obj.style,
+                                      linewidth=obj.width, alpha=obj.alpha, zorder=z)
+            elif isinstance(obj, VLine):
+                x_pos = obj.bar - start
+                if 0 <= x_pos <= len(x_indices):
+                    self.ax_price.axvline(x=x_pos, color=obj.color, linestyle=obj.style,
+                                          linewidth=obj.width, alpha=obj.alpha, zorder=z)
+            elif isinstance(obj, TrendLine):
+                x1 = obj.bar1 - start
+                x2 = obj.bar2 - start
+                # Even if points are outside window, matplotlib handles clipping
+                if obj.extend_right and x1 != x2:
+                    # Calculate slope and extend to right edge
+                    slope = (obj.price2 - obj.price1) / (x2 - x1)
+                    x2_ext = max(x2, len(x_indices) + 10)
+                    y2_ext = obj.price1 + slope * (x2_ext - x1)
+                    self.ax_price.plot([x1, x2_ext], [obj.price1, y2_ext],
+                                       color=obj.color, linestyle=obj.style,
+                                       linewidth=obj.width, alpha=obj.alpha, zorder=z)
+                else:
+                    self.ax_price.plot([x1, x2], [obj.price1, obj.price2],
+                                       color=obj.color, linestyle=obj.style,
+                                       linewidth=obj.width, alpha=obj.alpha, zorder=z)
+            elif isinstance(obj, Rectangle):
+                x1 = obj.bar1 - start
+                x2 = obj.bar2 - start
+                width = x2 - x1
+                height = obj.price2 - obj.price1
+                
+                rect = patches.Rectangle((x1, obj.price1), width, height,
+                                         linewidth=obj.width, edgecolor=obj.color,
+                                         facecolor=obj.fill_color or 'none',
+                                         alpha=obj.alpha, zorder=z)
+                self.ax_price.add_patch(rect)
+            elif isinstance(obj, Text):
+                x_pos = obj.bar - start
+                if 0 <= x_pos <= len(x_indices):
+                    bbox_args = None
+                    if obj.bgcolor:
+                        bbox_args = dict(boxstyle='round,pad=0.2', facecolor=obj.bgcolor,
+                                         edgecolor='none', alpha=0.7)
+                    weight = 'bold' if obj.bold else 'normal'
+                    self.ax_price.text(x_pos, obj.price, obj.text,
+                                       color=obj.color, fontsize=obj.size,
+                                       ha=obj.halign, va=obj.valign,
+                                       weight=weight, bbox=bbox_args, zorder=z)
 
         # X-axis labels (dates)
         date_labels = []
