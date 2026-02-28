@@ -7,7 +7,6 @@ Definitions for custom visual objects that strategies can draw on the chart.
 from dataclasses import dataclass
 from typing import Optional, Union, Tuple
 
-@dataclass
 class ChartObject:
     """Base class for all chart objects."""
     layer: int = 10  # zorder in matplotlib
